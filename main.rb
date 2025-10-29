@@ -14,10 +14,37 @@ def get_possible_moves(starting_position, used_moves)
   end
 end
 
-def knights_moves(starting_position, ending_position, used_moves = [])
-  return ending_position if starting_position == ending_position
-
-  possible_moves = get_possible_moves(starting_position, used_moves)
+def get_result(ending_position, parent_tracker)
+  result = [ending_position]
+  position_tracker = ending_position
+  until parent_tracker[position_tracker].nil?
+    position_tracker = parent_tracker[position_tracker]
+    result.unshift(position_tracker)
+  end
+  result
 end
 
-puts "possible moves for [1, 1]: #{get_possible_moves([1, 1], [[3,0], [2, 3]])}"
+def knights_moves(starting_position, ending_position)
+  return ending_position if starting_position == ending_position
+  used_moves = []
+  positions_queue = [starting_position]
+  parent_tracker = {starting_position => nil}
+
+  until positions_queue.empty? || positions_queue.any?(ending_position)
+    current_move = positions_queue[0]
+    
+    possible_moves = get_possible_moves(current_move, used_moves)
+    possible_moves.each do |move|
+      parent_tracker[move] = current_move
+      positions_queue << move
+    end
+    used_moves << current_move
+    positions_queue.shift
+  end
+  
+  get_result(ending_position, parent_tracker)
+end
+
+result = knights_moves([0,0],[7,7])
+puts "For [0,0] to [7,7], you made it in #{result.length} moves! Here's your path:"
+puts "#{result}"
